@@ -10,6 +10,7 @@ PRT(PeerReviewTemplate)
 
 - [O] 코드가 정상적으로 동작하고 주어진 문제를 해결했나요?
 >코드가 에러없이 작동할 것으로 예상되며, 결론을 마지막에 잘 정리해주셨음
+>총 3가지 모델(RNN, 1D CNN, GlobalMaxPooling1D기반) 구축 및 작동완료
 ```
 ('매우', 0.8843027353286743)|('약자', 0.8051141500473022)|('단체', 0.7845001220703125)|('취미', 0.5857348442077637)
 ('넘', 0.8789970278739929)|('정말', 0.7905513048171997)|('사후', 0.7741118669509888)|('유머', 0.5140613913536072)
@@ -31,7 +32,7 @@ PRT(PeerReviewTemplate)
 ```
 
 - [O] 주석을 보고 작성자의 코드가 이해되었나요?
->>>모델선언부터 학숩수행 평가까지 흐름을 주석으로 잘 정리해주심
+>모델선언부터 학숩수행 평가까지 흐름을 주석으로 잘 정리해주심
 ```
 # 모델 컴파일
 model1.compile(optimizer='adam',
@@ -56,8 +57,26 @@ results = model1.evaluate(X_test,  y_test, verbose=2)
 >에러 없이 잘 작동할 것으로 판단됨
 
 - [O] 코드 작성자가 코드를 제대로 이해하고 작성했나요? (직접 인터뷰해보기)
+>dropout등 여러 기법을 사용해 오버피팅을 막기 위한 코드 작성
+```
+#RNN 기반 모델 구성
+model1 = keras.Sequential()
+model1.add(keras.layers.Embedding(vocab_size, word_vector_dim, input_shape=(None,)))
+model1.add(keras.layers.LSTM(128))
+model1.add(keras.layers.Dense(32, activation='relu'))
+model1.add(keras.layers.Dropout(0.5))
+model1.add(keras.layers.Dense(8, activation='relu'))
+model1.add(keras.layers.Dropout(0.5))
+model1.add(keras.layers.Dense(1, activation='sigmoid'))
+```
 
 - [O] 코드가 간결한가요?
+>데이터 전처리 시에 토크나이징과 불용어를 제거하는 함수를 구축해 중복함수 정리
+```
+def load_data(train_data, test_data):
+    def tokenize_and_remove_stopword(data):
+```
+
 >모델학습부터 그래프 출력까지 자동화한 test_pipeline을 선언해서 코드 간결화시킴
 ```
 def test_pipeline(model, X_train, y_train, X_val, y_val, X_test, y_test, epochs=20, batch_size=512):
