@@ -7,6 +7,50 @@
 ------------------  
 - [x] **1. 코드가 정상적으로 동작하고 주어진 문제를 해결했나요?**
   네네. 코드가 정상적으로 동작하고 주어진 문제를 잘 해결하였습니다.
+* 한글 전처리 주요 코드
+```python
+ regex = r"[^a-zA-Z가-힣?.!,]+"
+```
+* 주어신 함수의 paramater 값이 잘 적용된 SentencePieceTrainer 생성
+```python
+def generate_tokenizer(corpus,
+                        vocab_size,
+                        lang="ko",
+                        pad_id=0,
+                        bos_id=1,
+                        eos_id=2,
+                        unk_id=3):
+    temp_file = f'{lang}_temp.txt'
+    model_prefix = f'{lang}_spm'
+    
+    # 주어진 코퍼스를 사용하여 임시 텍스트 파일 생성
+    with open(temp_file, 'w', encoding='utf-8') as f:
+        for sentence in corpus:
+            f.write(sentence + '\n')
+    
+    # 임시 파일을 이용하여 SentencePiece 모델 학
+    spm.SentencePieceTrainer.Train(
+        f'--input={temp_file} --model_prefix={model_prefix} '
+        f'--vocab_size={vocab_size} '
+        f'--pad_id={pad_id} --bos_id={bos_id} --eos_id={eos_id} --unk_id={unk_id}')
+    
+    # 학습된 모델을 불러와 SentencePieceProcessor 객체 생성
+    tokenizer = spm.SentencePieceProcessor()
+    tokenizer.Load(f'{model_prefix}.model')
+```
+* 토큰 길이 50이상 제거
+```python
+for idx in tqdm(range(len(kor_corpus))):
+    src_tokens = ko_tokenizer.EncodeAsIds(kor_corpus[idx])
+    tgt_tokens = en_tokenizer.EncodeAsIds(eng_corpus[idx])
+    
+    # 한국어와 영어 모두가 조건에 부합하는 데이터만 이용함
+    if len(src_tokens) <= 50 and len(tgt_tokens) <= 50:
+        src_corpus.append(src_tokens)
+        tgt_corpus.append(tgt_tokens)
+```
+* Tranformer에 필요한 단계별 기능들은 노드와 동일하므로 생략
+* 마지막 실행단에 loss값 저장하여 시각화 사용
 ```python
 import random
 
